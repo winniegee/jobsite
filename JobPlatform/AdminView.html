@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    </head>
+<!------ Include the above in your HEAD tag ---------->
+<body style="padding-top: 45px">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="usrdiv" class="pull-left">Welcome admin<span id="username"></span> </div>
+                <div class="alert alert-success" style="display:none;">
+                    <input type="button" id="logout" value="Logout" class="btn btn-success" />
+                </div>
+            </div>
+            <table class="table" id="table">
+                <thead>
+                    <tr>
+                        <th>
+                            UserName
+                        </th>
+                        <th>
+                            Career Field
+                        </th>
+                        <th>
+                            State of Residence
+                        </th>
+                        <th>
+                            Date-Time Registered
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+
+    <script>
+        $(Document).ready(
+            function () {
+                $('#admin').hide();
+                var username = localStorage.getItem('userName');
+                if (localStorage.getItem('access_token') == null) {
+                    window.location.href == "login.html";
+                }
+                if (userName != null) {
+                    $('#username').text(userName);
+                    $('#admin').show('fade');
+
+                }
+
+
+                $('#bnLogout').click(function () {
+
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('userName');
+                    window.location.href = "login.html";
+                });
+
+
+                $.ajax({
+                    url: '/api/user/get',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                    },
+
+                    success: function (data) {
+                        $('#table').empty();
+
+                        $.each(data, function (index, value) {
+                            var item = $('<tr><td>' + value.Email + '</td><td>' + value.Career + '</td><td>' + value.State + '</td><td>' + value.Date + '</td></tr>');
+                            $('#tbody').append(item);
+
+                        });
+                    },
+                    error: function (jqXHR) {
+                        if (jqXHR.status == '401') {
+                            alert('Your session has expired. Pls login again');
+                        }
+                        else {
+                            alert(jqXHR.responseText);
+                        }
+                    }
+                });
+
+            }
+        );
+    </script>
+</body>
+</html>
