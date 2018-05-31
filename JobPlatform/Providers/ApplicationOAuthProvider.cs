@@ -30,8 +30,9 @@ namespace JobPlatform.Providers
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
-
-            ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
+            //using (UserManager<ApplicationUser> userManager = _userManager)
+            //{
+                ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
 
             if (user == null)
             {
@@ -39,16 +40,31 @@ namespace JobPlatform.Providers
                 return;
             }
 
-            ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager,
-               OAuthDefaults.AuthenticationType);
-            ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,
+            ClaimsIdentity oAuthIdentity = await userManager.CreateIdentityAsync(user,
+               context.Options.AuthenticationType);
+            ClaimsIdentity cookiesIdentity = await userManager.CreateIdentityAsync(user,
                 CookieAuthenticationDefaults.AuthenticationType);
 
-            AuthenticationProperties properties = CreateProperties(user.UserName);
+            var identity = new ClaimsIdentity(context.Options.AuthenticationType);
+            cookiesIdentity.AddClaim(new Claim(ClaimTypes.Role, "user"));
+            cookiesIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.UserName));
+            cookiesIdentity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
+            var roles = userManager.GetRoles(user.Id);
+            foreach (var role in roles)
+            {
+                cookiesIdentity.AddClaim(new Claim(ClaimTypes.Role, "user"));
+
+                //    // List<Claim> roles = oAuthIdentity.Claims.Where(c => c.Type == ClaimTypes.Role).ToList();
+                //   // AuthenticationProperties properties = CreateProperties(user.UserName, Newtonsoft.Json.JsonConvert.SerializeObject(role));
+             }
+
+                AuthenticationProperties properties = CreateProperties(user.UserName);
             AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);
+
             context.Validated(ticket);
             context.Request.Context.Authentication.SignIn(cookiesIdentity);
         }
+        
 
         public override Task TokenEndpoint(OAuthTokenEndpointContext context)
         {
@@ -91,6 +107,8 @@ namespace JobPlatform.Providers
             IDictionary<string, string> data = new Dictionary<string, string>
             {
                 { "userName", userName }
+                //{"roles", ClaimTypes.Role },
+                
             };
             return new AuthenticationProperties(data);
         }

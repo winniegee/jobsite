@@ -4,6 +4,7 @@
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script type="text/javascript">
         $(function () {
             $('.button-checkbox').each(function () {
@@ -71,6 +72,7 @@
             padding: 0;
             margin: 0;
         }
+
         h2 {
             font-family: 'Open Sans', sans-serif;
             font-size: 20px;
@@ -81,6 +83,7 @@
             text-transform: uppercase;
             letter-spacing: 4px;
         }
+
         .colorgraph {
             height: 5px;
             border-top: 0;
@@ -146,19 +149,16 @@
                 url: '/token',
                 method: 'POST',
                 data: {
-                    username: $('#email').val(),
-                    password: $('#password').val(),
+                    UserName: $('#email').val(),
+                    Password: $('#password').val(),
                     grant_type: 'password'
                 },
                 success: function (response) {
                     localStorage.setItem('access_token', response.access_token);
                     localStorage.setItem('userName', response.userName);
-                    if (data.username=="admin@gmail.com") {
-                        window.location = "AdminView.html";
-                    }
-                    else {
-                        window.location = " UserPage.html";
-                    }
+                    //localStorage.setItem('roles', response.roles);
+                    getRole();
+                    
                 },
                 error: function (errors) {
                     swal(`${errors.responseText}`);
@@ -167,6 +167,34 @@
                 }
             })
         })
+
+       function getRole() {
+            $.ajax({
+                url: 'api/role/roles',
+                method: 'POST',
+                ContentType : "application/json",
+                data: {
+                    uname: localStorage.getItem('userName')
+                },
+                success: function (responsee) {
+                    alert(responsee.Message);
+                    if (responsee.Message == "Admin") {
+                        alert("redirecting");
+                        window.location = "AdminView.html";
+                    }
+                    
+                        
+                    
+                },
+                error: function (errors) {
+                    window.location = "UserPage.html";
+                    //swal(`${errors.responseText}`);
+                    
+                    //$('#errorText').text(errors.responseText);
+                    //$('#error').show('fade');
+                }
+            })
+        }
     </script>
 </body>
 </html>

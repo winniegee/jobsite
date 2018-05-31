@@ -17,6 +17,7 @@ using JobPlatform.Models;
 using JobPlatform.Providers;
 using JobPlatform.Results;
 using System.Linq;
+using System.Web.Security;
 
 namespace JobPlatform.Controllers
 {
@@ -266,6 +267,7 @@ namespace JobPlatform.Controllers
                 ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager,
                     CookieAuthenticationDefaults.AuthenticationType);
 
+                //AuthenticationProperties properties = ApplicationOAuthProvider.CreateProperties(user.UserName, user.Roles.ToString());
                 AuthenticationProperties properties = ApplicationOAuthProvider.CreateProperties(user.UserName);
                 Authentication.SignIn(properties, oAuthIdentity, cookieIdentity);
             }
@@ -330,16 +332,15 @@ namespace JobPlatform.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email, State= model.State, CareerField =model.CareerField };
-
+            model.Date = DateTime.Now;
+            var user = new ApplicationUser() {UserName = model.Email, Email = model.Email, State= model.State,Date=model.Date, Career =model.CareerField, PasswordHash=model.Password };
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
-
+            var currentUser = UserManager.FindByEmail(user.Email);
+            var roleresult= UserManager.AddToRole(user.Id, "user");
             return Ok();
         }
 

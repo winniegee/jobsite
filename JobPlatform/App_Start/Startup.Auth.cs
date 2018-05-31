@@ -29,7 +29,8 @@ namespace JobPlatform
 
             // Enable the application to use a cookie to store information for the signed in user
             // and to use a cookie to temporarily store information about a user logging in with a third party login provider
-            app.UseCookieAuthentication(new CookieAuthenticationOptions() {
+            app.UseCookieAuthentication(new CookieAuthenticationOptions()
+            {
                 LoginPath = new PathString("/login.html")
             });
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
@@ -41,7 +42,7 @@ namespace JobPlatform
                 TokenEndpointPath = new PathString("/Token"),
                 Provider = new ApplicationOAuthProvider(PublicClientId),
                 AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
+                AccessTokenExpireTimeSpan = TimeSpan.FromDays(3),
                 // In production mode set AllowInsecureHttp = false
                 AllowInsecureHttp = true
             };
@@ -81,8 +82,8 @@ namespace JobPlatform
         public static UserManager<ApplicationUser, string> Create()
         {
             var dbContext = new ApplicationDbContext();
-            var store = new UserStore<ApplicationUser, IdentityRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(dbContext);
-            var usermanager = new UserManager<ApplicationUser, string>(store);
+            var userstore = new UserStore<ApplicationUser, IdentityRole, string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>(dbContext);
+            var usermanager = new UserManager<ApplicationUser, string>(userstore);
 
             usermanager.UserValidator = new UserValidator<ApplicationUser, string>(usermanager)
             {
@@ -92,8 +93,8 @@ namespace JobPlatform
             usermanager.PasswordValidator = new PasswordValidator()
             {
                 RequiredLength = 4,
-                RequireDigit = false,
-                RequireUppercase = false
+                RequireDigit = true,
+                RequireUppercase = true
             };
             return usermanager;
         }

@@ -1,87 +1,50 @@
-﻿//using Microsoft.AspNet.Identity.EntityFramework;
-//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel.DataAnnotations;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using System.Web;
-//using System.Web.Http;
-//using System.Web.Security;
+﻿using JobPlatform.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using System.Web.Security;
 
-//namespace JobPlatform.Controllers
-//{
-//    [Authorize(Roles="Admin")]
-//    [RoutePrefix("api/roles")]
-//     public class RolesController: BaseRoleController
-//     {
-//        public async Task<IHttpActionResult> GetRole(string Id)
-//        {
-//            var role = await this.AppRoleManager.FindByIdAsync(Id);
-//            if (role != null)
-//            {
-//                return Ok(TheModelFactory.Create(role));
-//            }
-//            return NotFound();
-//        }
+namespace JobPlatform.Controllers
+{
+    [RoutePrefix("api/role")]
+    public class RoleController : ApiController
+    {
+        [HttpPost]
+        [Route("roles")]
+        public IHttpActionResult Get(UserViewModel model)
+        {
+                //create a variable user with data from the users identity
+               // var user = User.Identity;
+                //create a new instance of the Dbcontext
+                ApplicationDbContext context = new ApplicationDbContext();
+                //give variable UserManager data from the user
+                var UserManager = new UserManager<ApplicationUser> (new UserStore<ApplicationUser>(context));
+               var user = UserManager.Users.FirstOrDefault(u => u.Email == model.UName );
 
-//        [Route("", Name ="GetAllRoles")]
-//        public IHttpActionResult GetAllRoles()
-//        {
-//            var roles = this.AppRoleManager.Roles;
-//            return Ok(roles);
-//        }
 
-//        [Route("create")]
-//        public async Task<IHttpActionResult> Create(CreateRoleBindingModel model)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                return BadRequest(ModelState);
-//            }
+                bool isUser = UserManager.IsInRole(user.Id, "Admin");
+                //get the role of the current user
+               // var s = UserManager.GetRoles(user.GetUserId());
+                //check to see if the current role is Admin
+                if (isUser)
+                {
+                //return true;
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.OK, "Admin"));
+            }
+                else
+                {
+                //return false;
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Not admin"));
+            }
 
-//            var role = new IdentityRole { Name = model.Name };
-
-//            var result = await this.AppRoleManager.CreateAsync(role);
-
-//            if (!result.Succeeded)
-//            {
-//                return GetErrorResult(result);
-//            }
-
-//            Uri locationHeader = new Uri(Url.Link("GetRoleById", new { id = role.Id }));
-
-//            return Created(locationHeader, TheModelFactory.Create(role));
-
-//        }
-//        public class CreateRoleBindingModel
-//        {
-//            [Required]
-//            [StringLength(256, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 2)]
-//            [Display(Name = "Role Name")]
-//            public string Name { get; set; }
-
-//        }
-//        public class ModelFactory
-//        {
-//            //Code removed for brevity
-
-//            public RoleReturnModel Create(IdentityRole appRole)
-//            {
-
-//                return new RoleReturnModel
-//                {
-//                    Url = _UrlHelper.Link("GetRoleById", new { id = appRole.Id }),
-//                    Id = appRole.Id,
-//                    Name = appRole.Name
-//                };
-//            }
-//        }
-
-//        public class RoleReturnModel
-//        {
-//            public string Url { get; set; }
-//            public string Id { get; set; }
-//            public string Name { get; set; }
-//        }
-//    }
-//}
+        }
+    }
+}

@@ -20,7 +20,7 @@ namespace JobPlatform
 
         public UserRepo()
         {
-            context = new ApplicationDbContext();
+            this.context = new ApplicationDbContext();
         }
         public IEnumerable<ApplicationUser> GetUsers()
         {

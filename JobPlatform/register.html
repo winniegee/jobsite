@@ -248,12 +248,12 @@
                 method: 'POST',
                 data: {
                     Email: $('#email').val(),
+                    //UserName: $('#email').val(),
                     Name: $('#name').val(),
                     State: $('#state').val(),
                     CareerField:$('#career').val(),
                     Password: $('#password').val(),
-                    ConfirmPassword: $('#confirm').val(),
-                    Date: $('VarDate').val()
+                    ConfirmPassword: $('#confirm').val()
                 },
                 success: function (r) {
                     swal({

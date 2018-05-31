@@ -10,12 +10,22 @@ namespace JobPlatform.Controllers
 {
     //[Authorize(Roles ="Admin")]
     [RoutePrefix("api/user")]
+    [AllowAnonymous]
     public class UserController : ApiController
     {
+        private UserRepo repo;
+
+        // private UserRepo repo { get; }
+
+        public UserController()
+        {
+            repo = new UserRepo();
+        }
         [Route("get")]
+        [HttpGet]
         public IEnumerable<ApplicationUser> Get()
         {
-            UserRepo repo = new UserRepo();
+            
             return repo.GetUsers();
         }
 
